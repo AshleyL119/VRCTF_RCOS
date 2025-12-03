@@ -17,7 +17,9 @@ public static class StaticPausingFunctions
     public static bool currentlyPausing { get; private set; } = false;
     public static bool currentlyPaused { get; private set; } = false;
 
-    public static (string, PauseMenu_ButtonParent)[] allPauseOptions = { ("Resume", new PauseMenu_Resume()), ("Settings", new PauseMenu_Settings()) };
+    public static (string, PauseMenu_ButtonParent)[] allPauseOptions = { ("Resume", new PauseMenu_Resume()), 
+                                                                         ("Settings", new PauseMenu_Settings()), 
+                                                                         ("Inventory", new PauseMenu_Inventory())};
     private static GameObject[] allButtonsMade = null;
 
     public static void PauseGame() {
@@ -67,6 +69,18 @@ public static class StaticPausingFunctions
         if (!currentlyPaused || currentlyPausing || currentlyUnPausing) return;
         currentlyUnPausing = true;
 
+        //Reset
+        settingsOpen = false;
+        inventoryOpen = false;
+        GameObject pauseArea = GameObject.Find("PauseArea(Clone)");
+        if (pauseArea == null) return;
+
+        Transform SettingsPanel = pauseArea.transform.Find("SimpleSettingsOptions");
+        if (SettingsPanel == null) return;
+
+        SettingsPanel.gameObject.SetActive(false);
+        InventoryManager.instance.gameObject.SetActive(false);
+
         // make black fade in appear
         GameObject fadeOutSquareForNewScene = null;
         fadeOutSquareForNewScene = FadeOutSquare_Static.makeNewFadeOutSquare(10,10,10, (GameEnums.FadeOutSquare_CallbackType _) => {
@@ -78,6 +92,8 @@ public static class StaticPausingFunctions
             }
             allButtonsMade = null;
         });
+
+        
     }
 
     /* ---------------------------------------------------------------------- */
@@ -94,18 +110,30 @@ public static class StaticPausingFunctions
         if (pauseArea == null) return;
         Transform SettingsPanel = pauseArea.transform.Find("SimpleSettingsOptions");
         if (SettingsPanel == null) return;
+
+        if (InventoryManager.instance != null) {
+            InventoryManager.instance.gameObject.SetActive(false);
+        }
         SettingsPanel.gameObject.SetActive(settingsOpen);
     }
-}
 
+    private static bool inventoryOpen = false;
 
-public class PauseMenu_ButtonParent {
-    public virtual void Pressed() { Debug.Log("PauseMenu_ButtonParent's function was called when pressed"); }
-}
+    public static void showInventory() {
+        inventoryOpen = !inventoryOpen; 
+        GameObject pauseArea = GameObject.Find("PauseArea(Clone)");
+        if (pauseArea == null) return;
 
-public class PauseMenu_Resume : PauseMenu_ButtonParent {
-    public override void Pressed() { StaticPausingFunctions.UnpauseGame(); }
-}
-public class PauseMenu_Settings : PauseMenu_ButtonParent {
-    public override void Pressed() { StaticPausingFunctions.toggleSettings(); }
+        Transform SettingsPanel = pauseArea.transform.Find("SimpleSettingsOptions");
+        if (SettingsPanel == null) return;
+
+        // Hide settings if it's open
+        SettingsPanel.gameObject.SetActive(false);
+
+        if (InventoryManager.instance != null) {
+            InventoryManager.instance.gameObject.SetActive(inventoryOpen);
+            InventoryManager.instance.transform.position = SettingsPanel.position;
+            InventoryManager.instance.transform.rotation = SettingsPanel.rotation;
+        }
+    }
 }

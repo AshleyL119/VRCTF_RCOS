@@ -18,6 +18,14 @@ public class InventoryManager : MonoBehaviour
     private List<GameObject> allSlots = new List<GameObject>();
     private int totalPages => Mathf.CeilToInt((float)itemQueue.Count / slotsPerPage);
 
+
+    public static InventoryManager instance;
+
+    void Awake()
+    {
+        instance = this;
+    }
+
     private void Start()
     {
         GenerateSlots();
