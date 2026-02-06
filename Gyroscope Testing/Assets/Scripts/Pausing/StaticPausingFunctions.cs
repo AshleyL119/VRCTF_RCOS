@@ -25,6 +25,8 @@ public static class StaticPausingFunctions
     public static void PauseGame() {
         if (!allowedToPause || currentlyPausing || currentlyPaused) return;
         currentlyPausing = true;
+        settingsOpen = false;    
+        inventoryOpen = false;
         allButtonsMade = new GameObject[allPauseOptions.Length];
 
         // setup
@@ -37,7 +39,6 @@ public static class StaticPausingFunctions
         thePauseArea.transform.position = pauseAreaLocation;
         thePauseArea.transform.eulerAngles = new Vector3(0, Camera.main.transform.eulerAngles.y, 0);
         lastKnownPlayerPosition = player.transform.position;
-        if (settingsOpen) toggleSettings();
 
         // show all pause options
         Transform PauseOptionsContainer = thePauseArea.transform.Find("SimplePauseOptions");
@@ -110,10 +111,12 @@ public static class StaticPausingFunctions
         if (pauseArea == null) return;
         Transform SettingsPanel = pauseArea.transform.Find("SimpleSettingsOptions");
         if (SettingsPanel == null) return;
-
+        
+        inventoryOpen = false;
         if (InventoryManager.instance != null) {
             InventoryManager.instance.gameObject.SetActive(false);
         }
+        
         SettingsPanel.gameObject.SetActive(settingsOpen);
     }
 
@@ -128,6 +131,7 @@ public static class StaticPausingFunctions
         if (SettingsPanel == null) return;
 
         // Hide settings if it's open
+        settingsOpen = false; 
         SettingsPanel.gameObject.SetActive(false);
 
         if (InventoryManager.instance != null) {

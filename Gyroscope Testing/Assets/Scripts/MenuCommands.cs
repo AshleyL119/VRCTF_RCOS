@@ -11,15 +11,15 @@ public class MenuCommands : MonoBehaviour
 
     
     [HideInInspector] public string commandChosen = null;
-
+    private static MenuCommands currentlyOpen;
     public InventoryManager inventoryUI;
     private InspectControllerTest inspectController;
-    private GameObject[] commandButtons; // store references to generated buttons
 
+    private GameObject[] commandButtons; // store references to generated buttons
     private readonly string[] commands = {"Examine", "Add to Inventory"};
 
     private void Start()
-    {
+    {   
         inspectController = GetComponent<InspectControllerTest>();
         if (inspectController == null)
         {
@@ -29,6 +29,12 @@ public class MenuCommands : MonoBehaviour
 
     public void OnPointerClick()
     {   
+        // If another object has its menu open, close it
+        if (currentlyOpen != null && currentlyOpen != this)
+        {
+            currentlyOpen.ClearCommands();
+        }
+
         if (inspectController.IsInspecting)
         {
             inspectController.Activate(); // this will toggle off
@@ -37,6 +43,7 @@ public class MenuCommands : MonoBehaviour
         else if (commandButtons == null || commandButtons.Length == 0)
         {   
             GenerateCommands();
+            currentlyOpen = this;
         }
     }
 
@@ -124,6 +131,9 @@ public class MenuCommands : MonoBehaviour
             commandButtons = null;
             }
         }
+
+        if (currentlyOpen == this)
+            currentlyOpen = null;
     }
 
     private void Update()
